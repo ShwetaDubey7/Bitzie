@@ -1,0 +1,28 @@
+/* Override Bootstrap's Primary Color */
+:root {
+  --bs-primary: #0077b6;  /* Deep Blue */
+  --bs-secondary: #ff7f50; /* Coral */
+  --bs-success: #32cd32;   /* Lime Green */
+  --bs-info: #f4a261;      /* Warm Golden */
+  --bs-light: #f0f8ff;     /* Light Blue */
+  --bs-dark: #2f4f4f;      /* Dark Slate Grey */
+}
+
+/* Apply custom colors to Bootstrap elements */
+.navbar {
+  background-color: var(--bs-primary);
+}
+
+button {
+  background-color: var(--bs-secondary);
+  border: 1px solid var(--bs-secondary);
+}
+
+button:hover {
+  background-color: var(--bs-info);
+  border-color: var(--bs-info);
+}
+
+.navbar-nav .nav-link:hover {
+  color: #8A2BE2 !important;
+}
