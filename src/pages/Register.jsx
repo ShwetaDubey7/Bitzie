@@ -10,16 +10,30 @@ const Register = ({ setIsLoggedIn }) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user.name || !user.email || !user.password) {
       setError("All fields are required.");
       return;
     }
 
-    localStorage.setItem("registeredUser", JSON.stringify(user));
-    alert("Registration successful! Please log in.");
-    navigate("/login");
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      sessionStorage.setItem("token", data.token);
+      setIsLoggedIn(true);
+      alert("Registration successful!");
+      navigate("/");
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
