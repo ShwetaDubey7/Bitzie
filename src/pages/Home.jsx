@@ -1,19 +1,35 @@
+import React, { useState, useEffect } from "react"; 
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { FaSearch, FaMapMarkerAlt, FaBars, FaShoppingCart } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Home = ({ isLoggedIn, handleLogout, cartCount }) => {
+const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    setIsLoggedIn(!!token);
+    fetchCartCount();
+  }, []);
+
+  const fetchCartCount = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        headers: { "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      setCartCount(data.items ? data.items.length : 0);
+    } catch (error) {
+      console.error("Error fetching cart count:", error);
+    }
+  };
 
   return (
     <div className="container-fluid p-0" style={{ fontFamily: "Poppins, sans-serif" }}>
-      {/* SEO Meta Tags */}
-      <head>
-        <meta name="description" content="Order your favorite meals and get them delivered fast!" />
-        <meta name="keywords" content="food, dosa, pav bhaji, Masala Dosa, Chole Bhature, Bhature, Chole, Rajma, Rajma Chawal, Biryani, Veg Biryani, pav, paneer, Paneer Tikka, Masala" />
-      </head>
       
       {/* Navbar Section */}
       <nav className="navbar navbar-expand-lg px-4 shadow-sm" style={{ backgroundColor: "#E6E6FA" }}>
@@ -70,16 +86,16 @@ const Home = ({ isLoggedIn, handleLogout, cartCount }) => {
      {/* Featured Categories */}
 <section className="container my-5">
   <h2 className="text-center fw-bold text-purple mb-4">Popular Categories</h2>
-  <div className="row g-4">
+  <div className="row g-4 justify-content-center">
     {[
       { name: "Pizza", image: "/images/pizza.jpg" },
       { name: "Biryani", image: "/images/vegetablebiryani.jpg" },
-      { name: "Burgers", image: "/images/burger.jpg" },
+      { name: "Burger", image: "/images/burger.jpg" },
       { name: "Desserts", image: "/images/desserts.jpg" },
       { name: "South Indian", image: "/images/southindian.jpg" },
       { name: "Beverages", image: "/images/beverages.jpg" }
     ].map((category, index) => (
-      <div key={index} className="col-lg-2 col-md-4 col-6 text-center">
+      <div key={index} className="col-lg-2 col-md-4 col-sm-6 text-center">
         <div 
           className="card shadow-sm border-0 p-3 d-flex flex-column align-items-center" 
           style={{ backgroundColor: "#E6E6FA" }}
