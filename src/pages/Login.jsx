@@ -7,19 +7,23 @@ const Login = ({ setIsLoggedIn }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const registeredUser = JSON.parse(localStorage.getItem("registeredUser"));
-    if (!registeredUser) {
-      setError("No user found! Please register first.");
-      return;
-    }
-    if (registeredUser.email === email && registeredUser.password === password) {
-      localStorage.setItem("isLoggedIn", "true");
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      sessionStorage.setItem("token", data.token); // ✅ Store token securely
       setIsLoggedIn(true);
+      alert("Login successful!");
       navigate("/");
-    } else {
-      setError("Invalid email or password.");
+    } catch (error) {
+      setError(error.message);
     }
   };
 
