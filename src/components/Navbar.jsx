@@ -8,12 +8,12 @@ const Navbar = ({ cartItems }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(loggedInStatus);
+    const token = sessionStorage.getItem("token");
+    setIsLoggedIn(!!token);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
+    sessionStorage.removeItem("token");
     setIsLoggedIn(false);
     navigate("/login");
   };
@@ -38,7 +38,6 @@ const Navbar = ({ cartItems }) => {
               <li><Link to="/cart" className="text-dark text-decoration-none d-block py-1">Cart</Link></li>
               <li><Link to="/checkout" className="text-dark text-decoration-none d-block py-1">Checkout</Link></li>
               <li><Link to="/payment" className="text-dark text-decoration-none d-block py-1">Payment</Link></li>
-              <li><Link to="/register" className="text-dark text-decoration-none d-block py-1">Register</Link></li>
               {isLoggedIn ? (
                 <li>
                   <button className="btn text-danger text-decoration-none d-block w-100 text-start py-1" onClick={handleLogout}>
