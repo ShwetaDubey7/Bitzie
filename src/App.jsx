@@ -4,7 +4,7 @@ import Home from "./pages/Home.jsx";
 import Menu from "./pages/Menu.jsx";
 import Cart from "./pages/Cart.jsx";
 import Checkout from "./pages/Checkout.jsx";
-import Payment from "./pages/payment.jsx";
+import Payment from "./pages/Payment.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -14,23 +14,37 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(loggedInStatus);
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCartItems(storedCart);
+    const token = sessionStorage.getItem("token");
+    setIsLoggedIn(!!token);
+    fetchCart();
   }, []);
 
-  const addToCart = (item) => {
-    const updatedCart = [...cartItems, item];
-    setCartItems(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const fetchCart = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        headers: { "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      setCartItems(data.items || []);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+    }
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-    localStorage.setItem("cart", JSON.stringify([]));
+  const clearCart = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/cart", {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
+      });
+      if (!res.ok) throw new Error("Failed to clear cart");
+      fetchCart();
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
   };
-
+  
   return (
     <Router>
       <Navbar cartItems={cartItems.length} />
@@ -40,21 +54,22 @@ function App() {
         <Route path="/register" element={<Register setIsLoggedIn={setIsLoggedIn} />} />
         {isLoggedIn ? (
           <>
-            <Route path="/menu" element={<Menu addToCart={addToCart} />} />
-            <Route path="/cart" element={<Cart cartItems={cartItems} />} />
+            <Route path="/menu" element={<Menu fetchCart={fetchCart} />} />
+            <Route path="/cart" element={<Cart cartItems={cartItems} fetchCart={fetchCart}/>} />
             <Route path="/checkout" element={<Checkout cartItems={cartItems} clearCart={clearCart} />} />
             <Route path="/payment" element={<Payment cartItems={cartItems} clearCart={clearCart} />} />
           </>
         ) : (
-          <>
+          
+            <>
             <Route path="/menu" element={<Navigate to="/login" />} />
             <Route path="/cart" element={<Navigate to="/login" />} />
             <Route path="/checkout" element={<Navigate to="/login" />} />
+            <Route path="/payment" element={<Navigate to="/login" />} />
           </>
         )}
       </Routes>
     </Router>
   );
 }
-
 export default App;
